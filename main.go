@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
+	_ "github.com/swaggo/http-swagger/example/go-chi/docs"
 	"goStreaming/api"
 	"golang.org/x/sync/errgroup"
 	"html/template"
@@ -10,6 +12,21 @@ import (
 	"net/http"
 	"os"
 )
+
+// @title Swagger Example API
+// @version 1.0
+// @description This is a sample server Petstore server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host petstore.swagger.io
+// @BasePath /v2
 
 var g errgroup.Group
 
@@ -45,6 +62,7 @@ func fsRouter() http.Handler {
 		//}
 		return c.Stream(http.StatusOK, "video/mp4", f)
 	})
+	r.GET("/swagger/*", echoSwagger.WrapHandler)
 	return r
 }
 func mainRouter() http.Handler {
