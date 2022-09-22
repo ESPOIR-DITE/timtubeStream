@@ -52,8 +52,9 @@ func main() {
 }
 func fsRouter() http.Handler {
 	r := echo.New()
-	r.GET("/vid", func(c echo.Context) error {
-		f, err := os.Open("./files/Easy.mp4")
+	r.GET("/vid/:id", func(c echo.Context) error {
+		videoId := c.Param("id")
+		f, err := os.Open("./files/" + videoId + ".mp4")
 		if err != nil {
 			return err
 		}
