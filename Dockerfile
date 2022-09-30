@@ -22,7 +22,7 @@ COPY . .
 RUN go build -o main .
 
 # Expose port 8080 to the outside world// this dont make sense to me.
-EXPOSE 8000
+EXPOSE 8100
 
 # Command to run the executable
 CMD ["./main"]

@@ -7,7 +7,6 @@ import (
 	_ "github.com/swaggo/http-swagger/example/go-chi/docs"
 	"goStreaming/api"
 	"golang.org/x/sync/errgroup"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -31,21 +30,18 @@ import (
 var g errgroup.Group
 
 func main() {
-	mainServer := &http.Server{
-		Addr:    ":8000",
-		Handler: mainRouter(),
-	}
+
 	fileServer := &http.Server{
 		Addr:    ":8100",
 		Handler: fsRouter(),
 	}
-	g.Go(func() error {
-		return mainServer.ListenAndServe()
-	})
-	g.Go(func() error {
-		return fileServer.ListenAndServe()
-	})
-	log.Println("Service Running..")
+	fmt.Println("Service Running..")
+	err := fileServer.ListenAndServe()
+	if err != nil {
+		fmt.Println(err, " Service stop running..")
+		log.Fatal(err)
+	}
+
 	if err := g.Wait(); err != nil {
 		log.Fatal(err)
 	}
@@ -56,11 +52,9 @@ func fsRouter() http.Handler {
 		videoId := c.Param("id")
 		f, err := os.Open("./files/" + videoId + ".mp4")
 		if err != nil {
+			fmt.Println(err, " error reading the following file: ", videoId)
 			return err
 		}
-		//if f.Name() !=""{
-		//	c.Response().Header().Set(echo.HeaderContentLength, "Content-Length")
-		//}
 		return c.Stream(http.StatusOK, "video/mp4", f)
 	})
 	r.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -86,26 +80,5 @@ func mainRouter() http.Handler {
 		return c.Stream(resp.StatusCode, "video/mp4", resp.Body)
 	})
 
-	r.GET("", func(c echo.Context) error {
-		fileAdmins := []string{
-			"index.html",
-		}
-		ts, err := template.ParseFiles(fileAdmins...)
-		if err != nil {
-			fmt.Println(" page passing fail")
-			return err
-		}
-		type PageData struct {
-			Name string
-		}
-		data := PageData{"Espoir"}
-		w := c.Response().Writer
-		err = ts.Execute(w, data)
-		if err != nil {
-			fmt.Println(err, "")
-		}
-
-		return c.File("home.html")
-	})
 	return r
 }
